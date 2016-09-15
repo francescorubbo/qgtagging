@@ -5,13 +5,22 @@ from keras.layers import Dense, Dropout, Activation
 from keras.layers import Embedding
 from keras.layers import LSTM
 
+from optparse import OptionParser
+p = OptionParser()
+p.add_option('--nMaxTrack', type ="string", default= '15', dest="nMaxTrack", help="Maximum number of tracks")
+p.add_option('--nEpoch', type = "string", default = '10', dest = 'nEpoch', help = 'number of epochs ')
+
+(o,a) = p.parse_args()
+print o
+
 #[n_samples,n_tracks,n_features]
 
-qfile = '../data/user.rubbo.341566.root'
-gfile = '../data/user.rubbo.341565.root'
+qfile = '/u/at/rubbo/nfs/qgtagging/data/user.rubbo.341566.root'
+gfile = '/u/at/rubbo/nfs/qgtagging/data/user.rubbo.341565.root'
 vars = ['pt']
 
-max_len = 20
+max_len = int(o.nMaxTrack)
+nb_epoch = int(o.nEpoch)
 
 qjets = gettracks(vars,'qjet',qfile)
 gjets = gettracks(vars,'gjet',qfile)
@@ -37,8 +46,8 @@ model.compile(loss='binary_crossentropy',
               optimizer='rmsprop',
               metrics=['accuracy'])
 
-model.fit(X_train, y_train, batch_size=16, nb_epoch=10)
-model.save_weights('model.h5')
+model.fit(X_train, y_train, batch_size=16, nb_epoch=nb_epoch)
+model.save_weights('model_ntrk'+o.nMaxTrack+'_nepoch'+o.nEpoch+'.h5')
 
 score = model.evaluate(X_test, y_test, batch_size=16)
 print 'score',score

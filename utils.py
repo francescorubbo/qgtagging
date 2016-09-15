@@ -1,3 +1,4 @@
+
 from root_numpy import root2rec
 import numpy as np
 from sklearn.metrics import roc_curve,auc,roc_auc_score
@@ -55,6 +56,8 @@ def gettracks(vars,flav,filename,
     xx = np.array([zerofill(array[leave].tolist()).T for leave in leaves_train]).T[1::2]
     pt = array[flav+'_pt'][1::2]
     eta = array[flav+'_eta'][1::2]
+    ##hack to get pT fraction
+    xx/=pt[:,None,None]
 
     return xx[(pt>ptmin) & (pt<ptmax) & (np.fabs(eta)>etamin) & (np.fabs(eta)<etamax)]
 
