@@ -1,3 +1,4 @@
+
 from root_numpy import root2rec
 import numpy as np
 from sklearn.metrics import roc_curve,auc,roc_auc_score
@@ -61,15 +62,17 @@ def zerofill(input):
 
 def gettracks(vars,flav,filename,
               ptmin=20,ptmax=200,
-              etamin=0.,etamax=2.1):
+              etamin=0.,etamax=2.1,train=1):
 
     leaves_train = [flav+'_trk'+var for var in vars]
     leaves = leaves_train+[flav+'_pt',flav+'_eta']
     array = root2rec(filename,'tree',leaves)
     
-    xx = np.array([zerofill(array[leave].tolist()).T for leave in leaves_train]).T[1::2]
-    pt = array[flav+'_pt'][1::2]
-    eta = array[flav+'_eta'][1::2]
+    xx = np.array([zerofill(array[leave].tolist()).T for leave in leaves_train]).T[train::2]
+    pt = array[flav+'_pt'][train::2]
+    eta = array[flav+'_eta'][train::2]
+    ##hack to get pT fraction
+    xx/=pt[:,None,None]
 
     return xx[(pt>ptmin) & (pt<ptmax) & (np.fabs(eta)>etamin) & (np.fabs(eta)<etamax)]
 
