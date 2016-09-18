@@ -24,6 +24,21 @@ def getauc(qjets,gjets):
     score = np.concatenate( ( gjets, qjets ) )
     roc_auc = roc_auc_score(target,score)
     return roc_auc
+
+def geteffcut(jets,wp=0.5):
+    varmax = jets.max()
+    wpcut = 0.
+    cuts = np.arange(0,varmax,float(varmax)/500)
+    for cut in cuts:
+        eff = float(jets[jets<cut].shape[0])/jets.shape[0]
+        if eff>wp:
+#            print 'eff',eff
+            preveff = float(jets[jets<(cut-1)].shape[0])/jets.shape[0]
+#            print 'preveff',preveff
+            wpcut = cut if np.fabs(wp-eff)<np.fabs(wp-preveff) else (cut-1)
+#            print 'cut/wpcut', cut, '/', wpcut
+            break
+    return wpcut
     
 def getvars(vars,flav,filename,
             ptmin=20,ptmax=200,
