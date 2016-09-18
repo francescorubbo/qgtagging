@@ -47,15 +47,15 @@ def zerofill(input):
 
 def gettracks(vars,flav,filename,
               ptmin=20,ptmax=200,
-              etamin=0.,etamax=2.1):
+              etamin=0.,etamax=2.1,train=1):
 
     leaves_train = [flav+'_trk'+var for var in vars]
     leaves = leaves_train+[flav+'_pt',flav+'_eta']
     array = root2rec(filename,'tree',leaves)
     
-    xx = np.array([zerofill(array[leave].tolist()).T for leave in leaves_train]).T[1::2]
-    pt = array[flav+'_pt'][1::2]
-    eta = array[flav+'_eta'][1::2]
+    xx = np.array([zerofill(array[leave].tolist()).T for leave in leaves_train]).T[train::2]
+    pt = array[flav+'_pt'][train::2]
+    eta = array[flav+'_eta'][train::2]
     ##hack to get pT fraction
     xx/=pt[:,None,None]
 
