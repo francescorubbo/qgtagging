@@ -1,4 +1,3 @@
-
 from root_numpy import root2rec
 import numpy as np
 from sklearn.metrics import roc_curve,auc,roc_auc_score
@@ -6,17 +5,18 @@ from sklearn.metrics import roc_curve,auc,roc_auc_score
 def getvar(var,flav,filename,
            reco=False,
            ptmin=80,ptmax=110,
-           etamin=0.,etamax=2.1):
+           etamin=0.,etamax=2.1,train=0):
 
     varflav = flav
     if reco: varflav+='reco'
 
-    leaves = [varflav+'_'+var,flav+'_pt',flav+'_eta']
+    leaves = [flav+'_pt',flav+'_eta']
+    if var not in ['pt','eta']: leaves += [varflav+'_'+var]
     array = root2rec(filename,'tree',leaves)
     
-    vars = array[varflav+'_'+var][::2]
-    pt = array[flav+'_pt'][::2]
-    eta = array[flav+'_eta'][::2]
+    vars = array[varflav+'_'+var][train::2]
+    pt = array[flav+'_pt'][train::2]
+    eta = array[flav+'_eta'][train::2]
     
     return vars[(pt>ptmin) & (pt<ptmax) & (np.fabs(eta)>etamin) & (np.fabs(eta)<etamax)]
 
@@ -71,8 +71,6 @@ def gettracks(vars,flav,filename,
     xx = np.array([zerofill(array[leave].tolist()).T for leave in leaves_train]).T[train::2]
     pt = array[flav+'_pt'][train::2]
     eta = array[flav+'_eta'][train::2]
-    ##hack to get pT fraction
-    xx/=pt[:,None,None]
 
     return xx[(pt>ptmin) & (pt<ptmax) & (np.fabs(eta)>etamin) & (np.fabs(eta)<etamax)]
 
@@ -83,6 +81,14 @@ def concatenate(tocombine=[]):
              for elem in tocombine]
     return np.concatenate( items )
 
+from hep_ml.reweight import BinsReweighter
+def getweights(flav,filename,ptmin,ptmax):
+    pt = getvar('pt',flav,filename,ptmin=ptmin,ptmax=ptmax,train=1)
+    flatdist = np.random.uniform(ptmin,ptmax,pt.shape[0])    
+
+    reweighter = BinsReweighter()
+    reweighter.fit(original=pt, target=flatdist)
+    return reweighter.predict_weights(pt)
 
 import rootpy
 from rootpy.plotting.style import get_style, set_style
