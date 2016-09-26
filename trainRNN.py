@@ -13,6 +13,9 @@ p.add_option('--nEpoch', type = "string", default = '10', dest = 'nEpoch', help 
 (o,a) = p.parse_args()
 print o
 
+minpt = 50
+maxpt = 100
+
 #[n_samples,n_tracks,n_features]
 
 qfile = '/u/at/rubbo/nfs/qgtagging/data/user.rubbo.341566.root'
@@ -22,18 +25,27 @@ vars = ['pt']
 max_len = int(o.nMaxTrack)
 nb_epoch = int(o.nEpoch)
 
-qjets = gettracks(vars,'qjet',qfile)
-gjets = gettracks(vars,'gjet',qfile)
+qjets = gettracks(vars,'qjet',qfile,ptmin=minpt,ptmax=maxpt)
+gjets = gettracks(vars,'gjet',gfile,ptmin=minpt,ptmax=maxpt)
 
-print qjets.shape
-print gjets.shape
+print 'qjets',qjets.shape
+print 'gjets',gjets.shape
+qweights = getweights('qjet',qfile,minpt,maxpt)
+gweights = getweights('gjet',gfile,minpt,maxpt)
+print 'qweights',qweights.shape
+print 'gweights',gweights.shape
 
 X = concatenate( (gjets, qjets) )
 print X.shape
 X = X[:,:max_len,:]
-y = np.concatenate( ( np.zeros(len(gjets)), np.ones(len(qjets)) ) )
+print X.shape
+y = np.concatenate( ( np.zeros(gjets.shape[0]), np.ones(qjets.shape[0]) ) )
+weights = np.concatenate( (gweights,qweights) )
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+print 'y',y.shape
+print 'weights',weights.shape
+
+X_train, X_test, y_train, y_test, w_train, w_test = train_test_split(X, y, weights, test_size=0.3)
 
 model = Sequential()
 model.add(LSTM(output_dim=128, activation='sigmoid', inner_activation='hard_sigmoid',
@@ -46,7 +58,7 @@ model.compile(loss='binary_crossentropy',
               optimizer='rmsprop',
               metrics=['accuracy'])
 
-model.fit(X_train, y_train, batch_size=16, nb_epoch=nb_epoch)
+model.fit(X_train, y_train, sample_weight=w_train, batch_size=16, nb_epoch=nb_epoch)
 model.save_weights('model_ntrk'+o.nMaxTrack+'_nepoch'+o.nEpoch+'.h5')
 
 score = model.evaluate(X_test, y_test, batch_size=16)
