@@ -33,25 +33,27 @@ model.compile(loss='binary_crossentropy',
 
 
 from pylab import *
+from sklearn.metrics import roc_curve
 
 maxtracks = [10,20,50]
 for mt in maxtracks:
     nepochs = [10,20,50]
-    scores = []
     for ne in nepochs:
         model.load_weights('output/model_ntrk%(mt)d_nepoch%(ne)d.h5'%{'mt':mt,'ne':ne})
+        predicted = model.predict_proba(X,batch_size=16)
+        fpr,tpr,thres = roc_curve(y,predicted)
+        plot(fpr,tpr,label='mt%(mt)d_ne%(ne)d'%{'mt':mt,'ne':ne})
 
-        score = model.evaluate(X, y, batch_size=16)
-        print 'score',score
-        scores.append(score[1])
 
-    plot(nepochs,scores)    
-show()
-#predicted = model.predict_proba(X,batch_size=16)
-#
-#from sklearn.metrics import roc_curve
-#fpr,tpr,thres = roc_curve(y,predicted)
-#
-#plot(fpr,tpr,label='RNN')
-#
-#show()
+variables = ['n','neff']
+for var in variables:
+    qjets = getvar(var,'qjet',qfile,ptmin=minpt,ptmax=maxpt)
+    gjets = getvar(var,'gjet',gfile,ptmin=minpt,ptmax=maxpt)
+    target = np.concatenate( ( np.zeros(len(gjets)), np.ones(len(qjets)) ) )
+    score = np.concatenate( ( gjets, qjets ) )
+    fpr,tpr,thres = roc_curve(target,score)
+    plot(fpr,tpr,linestyle='--',label=var)
+
+legend(loc='upper left',bbox_to_anchor=(1, 1.25))
+
+savefig('mtnescan.png')
