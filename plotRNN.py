@@ -2,8 +2,13 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation
 from keras.layers import Embedding
 from keras.layers import LSTM
+from sklearn.metrics import roc_auc_score
 
 from utils import *
+
+from runbatch import maxtracks
+from runbatch import nepochs
+import numpy as np
 
 qfile = '../data/user.rubbo.341566.root'
 gfile = '../data/user.rubbo.341565.root'
@@ -33,19 +38,21 @@ model.compile(loss='binary_crossentropy',
 
 
 from pylab import *
-
-maxtracks = [10,20,50]
+xlabel('nepochs')
+ylabel('auc')
 for mt in maxtracks:
-    nepochs = [10,20,50]
     scores = []
+	aucs = []
     for ne in nepochs:
         model.load_weights('output/model_ntrk%(mt)d_nepoch%(ne)d.h5'%{'mt':mt,'ne':ne})
 
         score = model.evaluate(X, y, batch_size=16)
-        print 'score',score
         scores.append(score[1])
-
-    plot(nepochs,scores)    
+		proba = model.predict_proba(X, batch_size=16)
+		auc = roc_auc_score(y, proba)
+		aucs.append(auc)
+   name = 'ntracks: ' + mt
+   plot(nepochs, auc, c=, label=name)    
 show()
 #predicted = model.predict_proba(X,batch_size=16)
 #

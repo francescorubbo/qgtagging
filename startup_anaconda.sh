@@ -1,14 +1,14 @@
 #!/bin/bash
 
 /usr/local/bin/anaconda << EOF
-. /u/at/rubbo/.bash_profile
-source activate virtualpy
-mkdir -p /tmp/rubbo/
-cd /tmp/rubbo/
+. /u/at/$USER/.bash_profile
+source activate researchpy
+mkdir -p /tmp/$USER/
+cd /tmp/$USER/
 export THEANO_FLAGS="base_compiledir=${PWD}/BatchCompileDir/0/"
 ${1}
-cp -r /tmp/rubbo/*.h5 /u/at/rubbo/nfs/qgtagging/analysis/output/
+cp -r /tmp/$USER/*.h5 $PWD/output
 cd /tmp
-rm -r /tmp/rubbo
+rm -r /tmp/$USER
 rm -r /tmp/.keras
 EOF

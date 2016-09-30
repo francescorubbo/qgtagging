@@ -4,6 +4,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation
 from keras.layers import Embedding
 from keras.layers import LSTM
+from keras.layers import Masking
 
 from optparse import OptionParser
 p = OptionParser()
@@ -48,8 +49,8 @@ print 'weights',weights.shape
 X_train, X_test, y_train, y_test, w_train, w_test = train_test_split(X, y, weights, test_size=0.3)
 
 model = Sequential()
-model.add(LSTM(output_dim=128, activation='sigmoid', inner_activation='hard_sigmoid',
-               input_shape=(max_len,len(vars))))
+model.add(Masking(mask_value=0.0, input_shape=(max_len, len(vars))))
+model.add(LSTM(output_dim=128, activation='sigmoid', inner_activation='hard_sigmoid'))
 model.add(Dropout(0.5))
 model.add(Dense(1))
 model.add(Activation('sigmoid'))
