@@ -7,9 +7,12 @@ from keras.layers import LSTM
 from keras.layers import Masking
 
 from optparse import OptionParser
+from keras.callbacks import History 
+
 p = OptionParser()
 p.add_option('--nMaxTrack', type ="string", default= '15', dest="nMaxTrack", help="Maximum number of tracks")
 p.add_option('--nEpoch', type = "string", default = '10', dest = 'nEpoch', help = 'number of epochs ')
+#p.add_option('--trainFrac', type= "string", default = '0.3', dest = 'trainFrac', help='fraction of data to use for for training')
 
 (o,a) = p.parse_args()
 print o
@@ -25,6 +28,7 @@ vars = ['pt']
 
 max_len = int(o.nMaxTrack)
 nb_epoch = int(o.nEpoch)
+#trainFrac = float(o.trainFrac)
 
 qjets = gettracks(vars,'qjet',qfile,ptmin=minpt,ptmax=maxpt)
 gjets = gettracks(vars,'gjet',gfile,ptmin=minpt,ptmax=maxpt)
@@ -47,11 +51,16 @@ print 'y',y.shape
 print 'weights',weights.shape
 
 X_train, X_test, y_train, y_test, w_train, w_test = train_test_split(X, y, weights, test_size=0.3)
+#num_train = int(len(X_train)*trainFrac)
+#X_train = X_train[:num_train:, :, :]
+#y_train = y_train[:num_train, :, :]
+#w_train = w_train[:num_train, :, :]
+
 
 model = Sequential()
 model.add(Masking(mask_value=0.0, input_shape=(max_len, len(vars))))
-model.add(LSTM(output_dim=128, activation='sigmoid', inner_activation='hard_sigmoid'))
-model.add(Dropout(0.5))
+model.add(LSTM(output_dim=16, activation='sigmoid', inner_activation='hard_sigmoid'))
+model.add(Dropout(0.2))
 model.add(Dense(1))
 model.add(Activation('sigmoid'))
 
@@ -59,8 +68,11 @@ model.compile(loss='binary_crossentropy',
               optimizer='rmsprop',
               metrics=['accuracy'])
 
-model.fit(X_train, y_train, sample_weight=w_train, batch_size=16, nb_epoch=nb_epoch)
-model.save_weights('model_ntrk'+o.nMaxTrack+'_nepoch'+o.nEpoch+'.h5')
+hist = History()
+model.fit(X_train, y_train, sample_weight=w_train, batch_size=128, nb_epoch=nb_epoch, callbacks[hist])
+save_prefix = 'model_ntrk'+o.nMaxTrack+'_nepoch'+o.nEpoch
+model.save_weights(save_prefix + '.h5') #'_trainFrac'+o.trainFrac+'.h5')
+np.save(save_prefix + '_history.npy', hist.history)
 
-score = model.evaluate(X_test, y_test, batch_size=16)
+score = model.evaluate(X_test, y_test, batch_size=32)
 print 'score',score
