@@ -1,6 +1,6 @@
 import os
 
-maxtracks = [10, 20]
+maxtracks = [5, 10, 20, 50]
 nepochs = [1, 5, 10, 20]
 #trainFracs = [0.1, 0.3,  0.7,  1.0]
 for mt in maxtracks:
