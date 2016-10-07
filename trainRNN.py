@@ -35,8 +35,8 @@ gjets = gettracks(vars,'gjet',gfile,ptmin=minpt,ptmax=maxpt)
 
 print 'qjets',qjets.shape
 print 'gjets',gjets.shape
-qweights = getweights('qjet',qfile,minpt,maxpt)
-gweights = getweights('gjet',gfile,minpt,maxpt)
+qweights = getweights('qjet',qfile,minpt,maxpt) + 1.0
+gweights = getweights('gjet',gfile,minpt,maxpt) + 1.0
 print 'qweights',qweights.shape
 print 'gweights',gweights.shape
 
@@ -66,9 +66,7 @@ model.add(Dense(1))
 model.add(Activation('sigmoid'))
 
 optim = RMSprop(lr=0.01)
-model.compile(loss='binary_crossentropy',
-              optimizer=optim,
-              metrics=['accuracy'])
+model.compile(loss='binary_crossentropy', optimizer=optim,metrics=['accuracy'])
 
 save_prefix = 'model_ntrk'+o.nMaxTrack+'_nepochs'+o.nEpoch
 #model.save_weights(save_prefix + '.h5') #'_trainFrac'+o.trainFrac+'.h5')
