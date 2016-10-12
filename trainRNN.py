@@ -35,8 +35,8 @@ gjets = gettracks(vars,'gjet',gfile,ptmin=minpt,ptmax=maxpt)
 
 print 'qjets',qjets.shape
 print 'gjets',gjets.shape
-qweights = getweights('qjet',qfile,minpt,maxpt) + 1.0
-gweights = getweights('gjet',gfile,minpt,maxpt) + 1.0
+qweights = getweights('qjet',qfile,minpt,maxpt) 
+gweights = getweights('gjet',gfile,minpt,maxpt)
 print 'qweights',qweights.shape
 print 'gweights',gweights.shape
 

@@ -11,8 +11,8 @@ from utils import *
 #from runbatch import nepochs
 import numpy as np
 
-lossfunct = 'cross_entropy-lr0.01-shiftedpt'
-output_dir = 'output/'
+lossfunct = 'cross_entropy-lr0.01-20-50'
+output_dir = 'output_noshift/'
 
 qfile = '/u/at/rubbo/nfs/qgtagging/data/user.rubbo.341566.root'
 gfile = '/u/at/rubbo/nfs/qgtagging/data/user.rubbo.341565.root'
@@ -20,13 +20,10 @@ gfile = '/u/at/rubbo/nfs/qgtagging/data/user.rubbo.341565.root'
 minpt = 50
 maxpt = 100
 
-max_len=10
 vars = ['pt']
-
-qjets = gettracks(vars,'qjet',qfile,train=0,ptmin=minpt,ptmax=maxpt) + 1.0
-gjets = gettracks(vars,'gjet',gfile,train=0,ptmin=minpt,ptmax=maxpt) + 1.0
-X = concatenate( (gjets, qjets) )
-X = X[:,:max_len,:] 
+qjets = gettracks(vars,'qjet',qfile,train=0,ptmin=minpt,ptmax=maxpt)
+gjets = gettracks(vars,'gjet',gfile,train=0,ptmin=minpt,ptmax=maxpt) 
+X_all = concatenate( (gjets, qjets) )
 y = np.concatenate( (np.zeros(len(gjets)), np.ones(len(qjets)) ) )
 
 
@@ -46,13 +43,14 @@ axarr[0].set_ylabel('auc')
 axarr[1].set_xlabel('False Positive')
 axarr[1].set_ylabel('True Positive')
 
-maxtracks = [5, 10, 20, 50]
+maxtracks = [20, 50]
 nepochs = [1, 5, 10, 20]
 
 for mt in maxtracks:
 		scores = []
 		aucs = []
 		epochs = []
+		X = X_all[:, :mt, :]
 		for ne in nepochs:
 			filename = output_dir + 'model_ntrk%(mt)d_nepochs%(ne)d'%{'mt':mt,'ne':ne}
 			print filename
@@ -61,7 +59,7 @@ for mt in maxtracks:
 					continue
 			epochs.append(ne)
 			model = Sequential()
-			model.add(Masking(mask_value=0.0, input_shape=(max_len, len(vars))))
+			model.add(Masking(mask_value=0.0, input_shape=(mt, len(vars))))
 			model.add(LSTM(output_dim=16, activation='sigmoid', inner_activation='hard_sigmoid'))
 			model.add(Dropout(0.2))
 			model.add(Dense(1))
@@ -87,6 +85,8 @@ for mt in maxtracks:
 
 # Plotting versus truth
 variables = ['n','neff']
+i = 0
+loc = [(.4, .6), (.6, .7)]
 for var in variables:
 		qjets = -1.0 * getvar(var,'qjet',qfile,ptmin=minpt,ptmax=maxpt)
 		gjets = -1.0 * getvar(var,'gjet',gfile,ptmin=minpt,ptmax=maxpt)
@@ -94,21 +94,14 @@ for var in variables:
 		score = np.concatenate( ( gjets, qjets ) )
 		fpr,tpr,thres = roc_curve(target,score)
 		axarr[1].plot(fpr,tpr,label=var)
-
+		area = auc(fpr, tpr)
+		aucs = [area]*len(epochs)
+		axarr[0].plot(epochs, aucs, linestyle='--', label=var)
+		#plt.figtext(loc[i][0], loc[i][1], "AUC - %s: %.4f" % (var, area))
+		i += 1
 
 lgd1 = axarr[0].legend(loc='upper left', bbox_to_anchor=(1, 1.25))         
 lgd2 = axarr[1].legend(loc='upper left', bbox_to_anchor=(1, 1.25))
 plt.savefig(title,bbox_extra_artists=(lgd1, lgd2), bbox_inches='tight')
 plt.close()
 
-
-# Plot the validation error with epoch number 
-#plt.xlabel('maxtracks')
-#plt.ylabel('validation_error')
-#for mt in maxtracks:
-#		filename = 'model_ntrk%(mt)d_nepochs20_history.npy'%{'mt':mt}
-#		val_loss = np.load(output_dir + filename)[()]['val_loss']
-#		plt.plot(val_loss, label=filename)
-#legend = plt.legend(loc='upper left', bbox_to_anchor=(1, 1.25))
-#plt.savefig('val_error-vrs-epoch-%s.pdf' % (lossfunct), bbox_extra_artists=(legend,) , bbox_inches='tight')
-#plt.close()
