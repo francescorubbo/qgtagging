@@ -10,7 +10,7 @@ qfile = '../data/testsyst/JZ2W.root'
 gfile = '../data/testsyst/JZ2W.root'
 
 var = 'ntrk500'
-systname = 'exp'
+systname = 'me'
 
 bins = np.linspace(-0.5,30.5,32)
 bincenters = (bins+0.5)[:-1]
