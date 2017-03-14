@@ -1,11 +1,12 @@
 from pylab import *
-from utils import *
-from syst_dict import getsyst,applysyst
+from dataprovider import DataProvider
+from utils import SetupATLAS,geteffcut
 
 SetupATLAS()
+fig = plt.figure(figsize=(7, 5), dpi=100)
 
-minpts = [50,100]
-maxpts = [100,200]
+minpts = [50,100,200,300,400,500,600,800,1000,1200]
+maxpts = [100,200,300,400,500,600,800,1000,1200,1500]
 #qfile = '../data/testsyst/JZ2W.root'
 #gfile = '../data/testsyst/JZ2W.root'
 qfile = '../data/testsyst/dijet.root'
@@ -13,7 +14,11 @@ gfile = '../data/testsyst/dijet.root'
 
 var = 'ntrk500'
 systs = ['trackeff','trackfake']
+systnames = {'trackeff':'Track efficiency','trackfake':'Track fake rate'}
 colors = ['g','r','b']
+
+qdp = DataProvider(qfile,'qjet',[var]+[var+syst for syst in systs])
+gdp = DataProvider(gfile,'gjet',[var]+[var+syst for syst in systs])
 
 for systname,c in zip(systs,colors):
     print systname
@@ -28,12 +33,12 @@ for systname,c in zip(systs,colors):
         print minpt,maxpt
         pts.append( minpt+(maxpt-minpt)/2 )
         
-        qjets = getvar(var,'qjet',qfile,reco=True,ptmin=minpt,ptmax=maxpt)
-        qjets_syst = getvar(var+systname,'qjet',qfile,reco=True,ptmin=minpt,ptmax=maxpt)
+        qjets = qdp.getvar(var,ptmin=minpt,ptmax=maxpt)
+        qjets_syst = qdp.getvar(var+systname,ptmin=minpt,ptmax=maxpt)
         qs = qjets[(qjets>=0) & (qjets_syst>=0)]
         qs_syst = qjets_syst[(qjets>0) & (qjets_syst>0)]
-        gjets = getvar(var,'gjet',gfile,reco=True,ptmin=minpt,ptmax=maxpt)
-        gjets_syst = getvar(var+systname,'gjet',gfile,reco=True,ptmin=minpt,ptmax=maxpt)
+        gjets = gdp.getvar(var,ptmin=minpt,ptmax=maxpt)
+        gjets_syst = gdp.getvar(var+systname,ptmin=minpt,ptmax=maxpt)
         gs = gjets[(gjets>=0) & (gjets_syst>=0)]
         gs_syst = gjets_syst[(gjets>=0) & (gjets_syst>=0)]
 
@@ -54,22 +59,33 @@ for systname,c in zip(systs,colors):
         qeffs_symm.append( qeff_symm )
         geffs_symm.append( geff_symm )
     
-    plot(pts,qeffs,color=c,linestyle='--',marker='*')
-    plot(pts,geffs,color=c,linestyle='--',marker='.')
+    plot(pts,qeffs,color=c,linestyle='--',marker='o',mfc='none')
+    plot(pts,geffs,color=c,linestyle='--',marker='v',mfc='none')
 
     fill_between(pts,qeffs_syst,qeffs_symm,interpolate=True,
                  alpha=0.3,color=c,
-                 label='syst: '+systname)
+                 label=systnames[systname])
     fill_between(pts,geffs_syst,geffs_symm,interpolate=True,
                  alpha=0.3,color=c)
 
-plot([],[],color='gray',linestyle='None',marker='*',label='Quark Jet')
-plot([],[],color='gray',linestyle='None',marker='.',label='Gluon Jet')
-ylabel('Efficiency')
-xlabel('Jet $p_T$ [GeV]')
+plot([],[],color='gray',linestyle='None',marker='o',label='Quark Jet')
+plot([],[],color='gray',linestyle='None',marker='v',label='Gluon Jet')
 
+from matplotlib.ticker import AutoMinorLocator, MultipleLocator
+axes = plt.axes()
+axes.xaxis.set_minor_locator(AutoMinorLocator())
+axes.yaxis.set_minor_locator(AutoMinorLocator())
 
-ylim([0.,0.95])
+ylabel('Efficiency', position=(0., 1.), va='top', ha='right')
+xlabel('Jet $p_T$ [GeV]', position=(1., 0.), va='bottom', ha='right')
+axes.xaxis.set_label_coords(1., -0.20)
+axes.yaxis.set_label_coords(-0.18, 1.)
+
+plt.text(0.03, 0.95, "ATLAS",style='italic',weight='bold',fontsize = 18, ha='left', va='top', transform=axes.transAxes)
+plt.text(0.21, 0.95, "Simulation Internal",fontsize = 18, ha='left', va='top', transform=axes.transAxes)
+plt.text(0.03, 0.88, r"$\mathsf{\sqrt{s}}$ = 13 TeV",fontsize = 16, ha='left', va='top', transform=axes.transAxes)
+
+ylim([0.,1.1])
 xlim([minpts[0],maxpts[-1]])
 
 legend(loc='upper right')
