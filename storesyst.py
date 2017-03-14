@@ -6,10 +6,10 @@ from array import array
 
 SetupATLAS()
 
-#minpts = [50,100]
-#maxpts = [100,200]
-minpts = [50,100,200,300,400,500,600,800,1000,1200]
-maxpts = [100,200,300,400,500,600,800,1000,1200,1500]
+minpts = [50]
+maxpts = [100]
+#minpts = [50,100,200,300,400,500,600,800,1000,1200]
+#maxpts = [100,200,300,400,500,600,800,1000,1200,1500]
 filename = '../data/dijet.root'
 
 var = 'ntrk'
@@ -44,9 +44,9 @@ for iptbin,(minpt,maxpt) in enumerate(zip(minpts,maxpts)):
     for q in qjets: hquark.Fill(q)
     for q in qjets_up: hquark_up.Fill(q)
     for q in qjets_down: hquark_down.Fill(q)
-    #hquark.Write()
-    #hquark_up.Write()
-    #hquark_down.Write()
+    hquark.Write()
+    hquark_up.Write()
+    hquark_down.Write()
     for ibin in range(1,nbins+2):
         val = hquark.GetBinContent(ibin)
         ratioup = hquark_up.GetBinContent(ibin)/val if val>5 else 1.

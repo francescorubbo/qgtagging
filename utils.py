@@ -96,7 +96,7 @@ from matplotlib import rc
 def SetupATLAS():
     rootpy.log.basic_config_colorized()
     #use latex for text
-    rc('text', usetex=True)
+#    rc('text', usetex=True)
     # set the style
     style = get_style('ATLAS')
     style.SetEndErrorSize(3)
