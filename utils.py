@@ -14,9 +14,9 @@ def getvar(var,flav,filename,
     if var not in ['pt','eta']: leaves += [varflav+'_'+var]
     array = root2rec(filename,'tree',leaves)
     
-    vars = array[varflav+'_'+var][train::2]
-    pt = array[flav+'_pt'][train::2]
-    eta = array[flav+'_eta'][train::2]
+    vars = array[varflav+'_'+var]
+    pt = array[flav+'_pt']
+    eta = array[flav+'_eta']
     
     return vars[(pt>ptmin) & (pt<ptmax) & (np.fabs(eta)>etamin) & (np.fabs(eta)<etamax)]
 
