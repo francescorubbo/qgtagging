@@ -15,12 +15,13 @@ gfile = '../data/testsyst/dijet.root'
 var = 'ntrk500'
 systs = ['trackeff','trackfake']
 systnames = {'trackeff':'Track efficiency','trackfake':'Track fake rate'}
-colors = ['g','r','b']
+colors = ['r','b']
+linestyles = ['--','-.',':']
 
 qdp = DataProvider(qfile,'qjet',[var]+[var+syst for syst in systs])
 gdp = DataProvider(gfile,'gjet',[var]+[var+syst for syst in systs])
 
-for systname,c in zip(systs,colors):
+for systname,c,ls in zip(systs,colors,linestyles):
     print systname
     pts = []
     qeffs = []
@@ -59,14 +60,14 @@ for systname,c in zip(systs,colors):
         qeffs_symm.append( qeff_symm )
         geffs_symm.append( geff_symm )
     
-    plot(pts,qeffs,color=c,linestyle='--',marker='o',mfc='none')
-    plot(pts,geffs,color=c,linestyle='--',marker='v',mfc='none')
+    plot(pts,qeffs,color=c,linestyle='None',marker='o',mfc='none')
+    plot(pts,geffs,color=c,linestyle='None',marker='v',mfc='none')
 
     fill_between(pts,qeffs_syst,qeffs_symm,interpolate=True,
-                 alpha=0.3,color=c,
+                 alpha=0.3,color=c,linestyle=ls,linewidth=2,
                  label=systnames[systname])
     fill_between(pts,geffs_syst,geffs_symm,interpolate=True,
-                 alpha=0.3,color=c)
+                 alpha=0.3,color=c,linestyle=ls,linewidth=2)
 
 plot([],[],color='gray',linestyle='None',marker='o',label='Quark Jet')
 plot([],[],color='gray',linestyle='None',marker='v',label='Gluon Jet')

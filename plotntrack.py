@@ -46,8 +46,11 @@ plt.text(0.03, 0.95, "ATLAS",style='italic',weight='bold',fontsize = 18, ha='lef
 plt.text(0.21, 0.95, "Simulation Internal",fontsize = 18, ha='left', va='top', transform=axes.transAxes)
 plt.text(0.03, 0.88, r"$\mathsf{\sqrt{s}}$ = 13 TeV",fontsize = 16, ha='left', va='top', transform=axes.transAxes)
 
-ylim([0.,0.2])
+plt.text(0.03, 0.81, r"Anti-k$_{\rm t}$ EM+JES R=0.4",fontsize = 16, ha='left', va='top', transform=axes.transAxes)
+plt.text(0.03, 0.74, r"$|\eta|$<2.1",fontsize = 16, ha='left', va='top', transform=axes.transAxes)
+
+ylim([0.,0.25])
 
 legend(loc='center right')
-savefig('plots/ntrack')
+savefig('plots/ntrack.pdf')
 clf()

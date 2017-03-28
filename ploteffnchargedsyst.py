@@ -14,12 +14,14 @@ var = 'ntrk500'
 systs = ['exp','me','pdf']
 systnames = {'exp':'Total exp.','me':'ME','pdf':'PDF'}
 colors = ['g','r','b']
+hatches = ['','','']
+linestyles = ['--','-.',':']
 
 vars = [var]+[var+'w'+syst+'_'+updown for syst in systs for updown in ['up','down']]
 qdp = DataProvider(qfile,'qjet',vars)
 gdp = DataProvider(gfile,'gjet',vars)
 
-for systname,c in zip(systs,colors):
+for systname,c,h,ls in zip(systs,colors,hatches,linestyles):
     pts = []
     qeffs = []
     geffs = []
@@ -64,14 +66,14 @@ for systname,c in zip(systs,colors):
         geffs_up.append( geff_up )
         geffs_down.append( geff_down )
     
-    plot(pts,qeffs,color=c,linestyle='--',marker='o',mfc='none')
-    plot(pts,geffs,color=c,linestyle='--',marker='v',mfc='none')
+    plot(pts,qeffs,color=c,linestyle='None',marker='o',mfc='none')
+    plot(pts,geffs,color=c,linestyle='None',marker='v',mfc='none')
 
     fill_between(pts,qeffs_up,qeffs_down,interpolate=True,
-                 alpha=0.3,color=c,
+                 alpha=0.3,color=c,hatch=h,linestyle=ls,linewidth=2,
                  label=systnames[systname])
     fill_between(pts,geffs_up,geffs_down,interpolate=True,
-                 alpha=0.3,color=c)
+                 alpha=0.3,color=c,hatch=h,linestyle=ls,linewidth=2)
 
 plot([],[],color='gray',linestyle='None',marker='o',mfc='none',label='Quark Jet')
 plot([],[],color='gray',linestyle='None',marker='v',mfc='none',label='Gluon Jet')
