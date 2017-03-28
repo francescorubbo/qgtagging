@@ -112,3 +112,6 @@ def getsyst(flav,ptmax,systname):
 import numpy as np
 def applysyst(sign,syst,ntracks):
     return ntracks+sign*( int(syst)+(np.random.rand(len(ntracks))<(syst%1)) )
+
+def applysystpoisson(sign,syst,ntracks):
+    return ntracks+sign*np.random.poisson(syst)

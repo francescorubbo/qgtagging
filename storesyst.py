@@ -1,6 +1,6 @@
 from pylab import *
 from utils import *
-from syst_dict import getsyst,applysyst
+from syst_dict import getsyst,applysystpoisson,applysyst
 import ROOT as r
 from array import array
 
@@ -39,8 +39,10 @@ for iptbin,(minpt,maxpt) in enumerate(zip(minpts,maxpts)):
     systup = syst[0]
     systdown = syst[1]
     qjets = getvar(var,'qjet',filename,reco=False,ptmin=minpt,ptmax=maxpt)
-    qjets_up = applysyst(1.,systup,qjets)
-    qjets_down = applysyst(-1.,systdown,qjets)
+    qjets_up = applysystpoisson(1.,systup,qjets)
+    qjets_down = applysystpoisson(-1.,systdown,qjets)
+#    qjets_up = applysyst(1.,systup,qjets)
+#    qjets_down = applysyst(-1.,systdown,qjets)
     for q in qjets: hquark.Fill(q)
     for q in qjets_up: hquark_up.Fill(q)
     for q in qjets_down: hquark_down.Fill(q)
@@ -59,8 +61,10 @@ for iptbin,(minpt,maxpt) in enumerate(zip(minpts,maxpts)):
     systup = syst[0]
     systdown = syst[1]
     gjets = getvar(var,'gjet',filename,reco=False,ptmin=minpt,ptmax=maxpt)
-    gjets_up = applysyst(1.,systup,gjets)
-    gjets_down = applysyst(-1.,systdown,gjets)
+    gjets_up = applysystpoisson(1.,systup,gjets)
+    gjets_down = applysystpoisson(-1.,systdown,gjets)
+#    gjets_up = applysyst(1.,systup,gjets)
+#    gjets_down = applysyst(-1.,systdown,gjets)
     for g in gjets: hgluon.Fill(g)
     for g in gjets_up: hgluon_up.Fill(g)
     for g in gjets_down: hgluon_down.Fill(g)
